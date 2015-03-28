@@ -1,0 +1,11 @@
+- name: install pillow requirements
+  apt: name={{item}} state=installed
+  with_items:
+    - libxml2-dev
+    - libxslt1-dev
+    - zlib1g-dev 
+    - libjpeg62-dev
+    - libfreetype6
+    - libfreetype6-dev
+  sudo: yes
+

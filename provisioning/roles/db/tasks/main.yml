@@ -1,0 +1,43 @@
+---
+- name: ensure postgres apt key exists
+  apt_key: url=https://www.postgresql.org/media/keys/ACCC4CF8.asc
+  sudo: yes
+
+- name: Add the postgres apt repository exists so we can get newer versions of postgresql
+  apt_repository: repo='deb http://apt.postgresql.org/pub/repos/apt/ trusty-pgdg main'
+  sudo: yes
+
+- name: Install PostgreSQL
+  apt: name={{ item }} update_cache=true state=installed
+  with_items:
+    - postgresql-9.4
+    - python-psycopg2
+    - postgresql-server-dev-9.4
+  environment: locales
+  tags: packages
+  sudo: yes
+
+- name: Ensure the PostgreSQL service is running
+  service: name=postgresql state=started enabled=yes
+  sudo: yes
+
+- name: Ensure database is created
+  sudo_user: postgres
+  sudo: yes
+  postgresql_db: name={{ db_name }}
+                 encoding='UTF-8'
+                 lc_collate='en_US.UTF-8'
+                 lc_ctype='en_US.UTF-8'
+                 template='template0'
+                 state=present
+
+- name: Ensure user has access to the database
+  sudo: yes
+  sudo_user: postgres
+
+  postgresql_user: db={{ db_name }}
+                   name={{ db_user }}
+                   login_password={{ db_password }}
+                   password={{ db_password }}
+                   priv=ALL
+                   state=present

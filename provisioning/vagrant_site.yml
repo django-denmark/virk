@@ -1,0 +1,31 @@
+---
+# Variables for vagrant
+#
+- hosts: virk
+  vars:
+    project_name: virk
+    project_repo:
+    virtualenv_root: "/home/vagrant/envs/{{ project_name }}"
+    project_root: "{{virtualenv_root}}/{{ project_name }}"
+    sudo: yes
+
+    db_user: virk
+    db_name: virk
+    db_listen_on: 'localhost'
+    db_hba: "127.0.0.1/32"
+    db_password: 123
+
+  roles:
+    - common
+    - db
+    - pillow
+
+  tasks:
+    - name: add to bashrc
+      lineinfile:
+       dest=/home/vagrant/.bashrc
+       line="source {{virtualenv_root}}/bin/activate; cd /vagrant"
+       insertafter=EOF
+
+    - name: ensure required packages are installed.
+      pip: requirements=/vagrant/requirements.txt virtualenv={{virtualenv_root}}

@@ -1,0 +1,35 @@
+---
+
+- name: ensure python-software-properties is installed
+  apt: pkg=python-software-properties state=installed
+  sudo: yes
+
+- name: add rabbitmq official apt repository
+  apt_repository: repo='deb http://www.rabbitmq.com/debian/ testing main' state=present
+  sudo: yes
+
+- name: install rabbitmq
+  apt: pkg=rabbitmq-server state=installed force=yes
+  sudo: yes
+
+- name: enable rabbitmq plugins
+  rabbitmq_plugin: names=rabbitmq_management,rabbitmq_tracing state=enabled
+  notify:
+    - restart rabbitmq
+  sudo: yes
+
+- name: add users vhost
+  rabbitmq_vhost: name="{{project_name}}" state=present
+  sudo: yes
+
+- name: add users
+  rabbitmq_user: user={{project_name}} password=123 tags=administrator,{{project_name}} vhost={{project_name}} configure_priv=.* write_priv=.* read_priv=.* state=present
+  sudo: yes
+
+- name: remove default guest user
+  rabbitmq_user: user=guest state=absent
+  sudo: yes
+
+- name: ensure vhost /test is present
+  rabbitmq_vhost: name=/test state=present
+  sudo: yes
